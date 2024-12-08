@@ -93,20 +93,21 @@ def print_stats(stats):
         print(f"\n📅 **Your bash adventure started on** {stats['first_cmd_time'].strftime('%Y-%m-%d')} **and ended on** {stats['last_cmd_time'].strftime('%Y-%m-%d')}")
     print(f"\n📈 **Most Active Day:** {stats['most_active_day']}")
     print(f"\n🗓️ **Weekend Commands:** {stats['weekend_commands']} commands run on weekends")
-    def create_app(stats):
-        app = Flask(__name__)
+    
+def create_app(stats):
+    app = Flask(__name__)
 
-        @app.route('/')
-        def index():
-            return render_template('index.html', stats=stats)
+    @app.route('/')
+    def index():
+        return render_template('index.html', stats=stats)
 
-        @app.route('/bash_wrapped_data.json')
-        def bash_wrapped_data():
-            with open('bash_wrapped_data.json', 'r') as f:
-                data = json.load(f)
-            return data
+    @app.route('/bash_wrapped_data.json')
+    def bash_wrapped_data():
+        with open('bash_wrapped_data.json', 'r') as f:
+            data = json.load(f)
+        return data
 
-        return app
+    return app
 
 def start_server(app):
     app.run(host='0.0.0.0', port=8081)
