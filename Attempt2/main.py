@@ -1,37 +1,35 @@
-# Python code
-
 import os
 import re
 import json
 from datetime import datetime
+from collections import Counter, defaultdict
 
-history_file = os.path.expanduser("~/.bash_history")
-commands = []
-timestamps = []
-with open(history_file, 'r') as f:
-    lines = f.readlines()
+def parse_bash_history(file_path):
+    with open(file_path, 'r') as f:
+        lines = f.readlines()
+
+    commands = []
+    timestamps = []
+    regex = re.compile(r'^#(\d+)$')
+
     i = 0
     while i < len(lines):
         line = lines[i].strip()
-        if line.startswith('#'):
-            # Unix timestamp
-            ts = int(line[1:])
-            if i + 1 < len(lines):
-                cmd = lines[i + 1].strip()
-                commands.append(cmd)
-                timestamps.append(ts)
-                i += 2
-            else:
-                i += 1
-        else:
-            # No timestamp
-            cmd = line
-            commands.append(cmd)
-            timestamps.append(None)
+        timestamp_match = regex.match(line)
+        if timestamp_match and i + 1 < len(lines):
+            ts = int(timestamp_match.group(1))
             i += 1
+            cmd = lines[i].strip()
+            commands.append((ts, cmd))
+        else:
+            commands.append((None, line))
+        i += 1
+    return commands
 
-# Process commands
-from collections import Counter, defaultdict
+history_file = os.path.expanduser("~/.bash_history")
+parsed_commands = parse_bash_history(history_file)
+commands = [cmd for ts, cmd in parsed_commands]
+timestamps = [ts for ts, cmd in parsed_commands]
 
 command_counts = Counter()
 longest_command = ""
