@@ -71,10 +71,10 @@
         fetch('bash_wrapped_data.json')
             .then(response => response.json())
             .then(data => {
-                // Productivity Chart
+                // Productivity Chart (Circle Bar Chart)
                 const ctx = document.getElementById('productivity-chart').getContext('2d');
                 new Chart(ctx, {
-                    type: 'bar',
+                    type: 'polarArea',
                     data: {
                         labels: [...Array(24).keys()],
                         datasets: [{
@@ -86,9 +86,8 @@
                         }],
                     },
                     options: {
-                        scales: {
-                            x: { title: { display: true, text: 'Hour of Day' } },
-                            y: { title: { display: true, text: 'Number of Commands' } },
+                        scale: {
+                            ticks: { beginAtZero: true },
                         },
                     },
                 });
