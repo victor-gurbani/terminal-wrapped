@@ -7,8 +7,48 @@ from datetime import datetime
 from collections import Counter, defaultdict
 from flask import Flask, render_template
 
+def detect_history_file(shell=None):
+    history_file = ""
+    shell = shell or os.path.basename(os.getenv('SHELL', ''))
+    home = os.path.expanduser('~')
+
+    if shell == "fish":
+        fish_history = os.path.join(home, '.local', 'share', 'fish', 'fish_history')
+        if os.path.isfile(fish_history):
+            history_file = fish_history
+    elif shell == "zsh":
+        zsh_history = os.getenv('ZDOTDIR', home)
+        zsh_history = os.path.join(zsh_history, '.zsh_history')
+        if os.path.isfile(zsh_history):
+            history_file = zsh_history
+    elif shell == "bash":
+        bash_history = os.path.join(home, '.bash_history')
+        if os.path.isfile(bash_history):
+            history_file = bash_history
+    else:
+        print(f"Your shell '{shell}' is not supported.")
+        exit(1)
+
+    if not history_file:
+        print(f"The history file for shell '{shell}' was not found.")
+        exit(1)
+    return history_file
+
+def parse_history(history_file, shell):
+    commands = []
+    if shell == "bash":
+        commands = parse_bash_history(history_file)
+    elif shell == "zsh":
+        commands = parse_zsh_history(history_file)
+    elif shell == "fish":
+        commands = parse_fish_history(history_file)
+    else:
+        print(f"Unsupported shell: {shell}")
+        exit(1)
+    return commands
+
 def parse_bash_history(file_path):
-    with open(file_path, 'r') as f:
+    with open(file_path, 'r', errors='ignore') as f:
         lines = f.readlines()
 
     commands = []
@@ -23,9 +63,42 @@ def parse_bash_history(file_path):
             i += 1
             cmd = lines[i].strip()
             commands.append((ts, cmd))
-        else:
+        elif line and not line.startswith('#'):
             commands.append((None, line))
         i += 1
+    return commands
+
+def parse_zsh_history(file_path):
+    regex = re.compile(r': (\d+):\d+;(.*)')
+    commands = []
+    with open(file_path, 'r', errors='ignore') as f:
+        for line in f:
+            match = regex.match(line)
+            if match:
+                ts = int(match.group(1))
+                cmd = match.group(2).strip()
+                commands.append((ts, cmd))
+    return commands
+
+def parse_fish_history(file_path):
+    regex_cmd = re.compile(r'- cmd: (.*)')
+    regex_when = re.compile(r'  when: (\d+)')
+    commands = []
+    with open(file_path, 'r', errors='ignore') as f:
+        cmd = None
+        ts = None
+        for line in f:
+            line = line.rstrip()
+            cmd_match = regex_cmd.match(line)
+            if cmd_match:
+                cmd = cmd_match.group(1)
+            ts_match = regex_when.match(line)
+            if ts_match:
+                ts = int(ts_match.group(1))
+            if cmd and ts:
+                commands.append((ts, cmd))
+                cmd = None
+                ts = None
     return commands
 
 def generate_stats(commands):
@@ -88,12 +161,12 @@ def print_stats(stats):
     print("\n🤪 **Weirdest Commands:**")
     for cmd in stats['weirdest_cmds']:
         print(f"- {cmd}")
-    print(f"\n📊 **Total Commands Run During the Year:** {stats['total_commands']}")
+    print(f"\n📊 **Total Commands Run:** {stats['total_commands']}")
     if 'first_cmd_time' in stats and 'last_cmd_time' in stats:
-        print(f"\n📅 **Your bash adventure started on** {stats['first_cmd_time'].strftime('%Y-%m-%d')} **and ended on** {stats['last_cmd_time'].strftime('%Y-%m-%d')}")
+        print(f"\n📅 **Your bash adventure started on** {stats['first_cmd_time'].strftime('%Y-%m-%d')} **to** {stats['last_cmd_time'].strftime('%Y-%m-%d')}")
     print(f"\n📈 **Most Active Day:** {stats['most_active_day']}")
     print(f"\n🗓️ **Weekend Commands:** {stats['weekend_commands']} commands run on weekends")
-    
+
 def create_app(stats):
     app = Flask(__name__)
 
@@ -106,7 +179,7 @@ def create_app(stats):
         with open('bash_wrapped_data.json', 'r') as f:
             data = json.load(f)
         return data
-
+    
     return app
 
 def start_server(app):
@@ -114,10 +187,14 @@ def start_server(app):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--history', default=os.path.expanduser('~/.bash_history'), help='Path to bash history file')
+    parser.add_argument('--shell', choices=['bash', 'zsh', 'fish'], help='Specify the shell')
+    parser.add_argument('--history', help='Path to history file')
     args = parser.parse_args()
 
-    commands = parse_bash_history(args.history)
+    shell = args.shell or os.path.basename(os.getenv('SHELL', ''))
+    history_file = args.history or detect_history_file(shell)
+
+    commands = parse_history(history_file, shell)
     stats = generate_stats(commands)
     print_stats(stats)
 
