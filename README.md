@@ -80,6 +80,16 @@ The script outputs statistics to the console and starts a Flask web server at `h
 
 Open your web browser and navigate to `http://localhost:8081` to view your terminal usage wrapped in an interactive web interface with charts.
 
+> [!NOTE]
+>
+> To ensure time-specific statistics are shown, check that the following are enabled for your shell:
+>
+> - For Zsh - [EXTENDED_HISTORY](https://zsh.sourceforge.io/Doc/Release/Options.html#History) (oh-my-zsh has it enabled by default)
+> - For Bash - [HISTTIMEFORMAT](https://www.gnu.org/software/bash/manual/bash.html#index-HISTTIMEFORMAT)
+>
+> **Commands executed before configuring the option won't be recorded with a timestamp, affecting the stats**.
+
+
 ## 📋 Dependencies
 
 - Python 3.x
