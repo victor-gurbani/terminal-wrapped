@@ -20,6 +20,14 @@
     - Circle bar chart showing peak productivity hours.
 - **Local Web Interface**: Starts a Flask web server to display statistics and charts in a user-friendly interface.
 
+## 🏃 Quickstart
+
+To quickly set up and run Terminal-Wrapped, you can use the following command:
+
+```bash
+curl -s https://raw.githubusercontent.com/victor-gurbani/terminal-wrapped/main/quickstart.sh | bash
+```
+
 ## 🚀 Installation
 
 1. **Clone the repository**:
