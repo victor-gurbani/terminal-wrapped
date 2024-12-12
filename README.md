@@ -119,6 +119,10 @@ terminal-wrapped/
 
 Contributions are welcome! Feel free to submit issues or pull requests to improve the project.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=victor-gurbani/terminal-wrapped&type=Date)](https://star-history.com/#victor-gurbani/terminal-wrapped&Date)
+
 ## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
