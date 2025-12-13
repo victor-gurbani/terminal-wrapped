@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 # Terminal-Wrapped Quickstart Script
+set -e  # Exit immediately if a command exits with a non-zero status
+
+echo "🚀 Starting Terminal-Wrapped Setup..."
 
 # Function to check command existence
 command_exists () {

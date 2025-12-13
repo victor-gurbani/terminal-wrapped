@@ -3,6 +3,8 @@ import re
 import json
 import threading
 import argparse
+import webbrowser
+import time
 from datetime import datetime
 from collections import Counter, defaultdict
 from flask import Flask, render_template
@@ -296,7 +298,17 @@ def create_app(stats):
     return app
 
 def start_server(app):
-    app.run(host='0.0.0.0', port=8081)
+    port = 8081
+    url = f"http://127.0.0.1:{port}"
+    
+    def open_browser():
+        time.sleep(1.5)  # Give the server a moment to start
+        webbrowser.open(url)
+        print(f"🚀 Dashboard is live! Opening {url} in your browser...")
+        print("Press Ctrl+C to stop the server.")
+
+    threading.Thread(target=open_browser).start()
+    app.run(host='127.0.0.1', port=port)
 
 def main():
     parser = argparse.ArgumentParser()
@@ -315,8 +327,9 @@ def main():
     with open('bash_wrapped_data.json', 'w') as f:
         json.dump(stats, f, default=str)
 
+    print("\n✨ Analysis complete! Starting the dashboard...")
     app = create_app(stats)
-    threading.Thread(target=start_server, args=(app,)).start()
+    start_server(app) # No need for threading here as app.run blocks, but we moved threading inside start_server for the browser opener? No wait.
 
 if __name__ == '__main__':
     main()
