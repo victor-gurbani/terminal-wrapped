@@ -132,6 +132,44 @@ def generate_stats(commands):
 
     most_active_day = max(days, key=days.get) if days else ""
 
+    # New Statistics
+    
+    # 1. Sudo Usage
+    sudo_count = sum(1 for cmd in cmd_only if cmd.strip().startswith('sudo'))
+    sudo_percentage = (sudo_count / total_commands * 100) if total_commands > 0 else 0
+
+    # 2. Pipe Master
+    pipe_master_cmd = max(cmd_only, key=lambda x: x.count('|')) if cmd_only else ""
+    pipe_count = pipe_master_cmd.count('|') if pipe_master_cmd else 0
+
+    # 3. Git Addict
+    git_count = sum(1 for cmd in cmd_only if cmd.strip().startswith('git'))
+    git_percentage = (git_count / total_commands * 100) if total_commands > 0 else 0
+
+    # 4. Night Owl vs Early Bird
+    night_owl_cmds = sum(hours[0:6])
+    early_bird_cmds = sum(hours[6:12])
+    chronotype = "Night Owl 🦉" if night_owl_cmds > early_bird_cmds else "Early Bird 🌅"
+
+    # 5. Directory Hopper (Approximate via 'cd')
+    cd_cmds = [cmd.split()[1] for cmd in cmd_only if cmd.strip().startswith('cd ') and len(cmd.split()) > 1]
+    top_directories = Counter(cd_cmds).most_common(3)
+
+    # 6. Vocabulary Size
+    vocab_size = len(unique_commands)
+
+    # 7. The "Oops" Moment
+    rm_count = sum(1 for cmd in cmd_only if cmd.strip().startswith('rm'))
+
+    # 8. Editor Wars
+    editors = ['vim', 'vi', 'nano', 'code', 'emacs', 'nvim']
+    editor_counts = {ed: 0 for ed in editors}
+    for cmd in cmd_only:
+        first_word = cmd.split()[0] if cmd.split() else ""
+        if first_word in editors:
+            editor_counts[first_word] += 1
+    favorite_editor = max(editor_counts, key=editor_counts.get) if any(editor_counts.values()) else "None"
+
     stats = {
         'total_commands': total_commands,
         'most_common_cmds': most_common_cmds,
@@ -144,6 +182,16 @@ def generate_stats(commands):
         'most_active_day': most_active_day,
         'weekend_commands': weekend_commands,
         'months': months,
+        'sudo_percentage': round(sudo_percentage, 2),
+        'pipe_master_cmd': pipe_master_cmd,
+        'pipe_count': pipe_count,
+        'git_percentage': round(git_percentage, 2),
+        'chronotype': chronotype,
+        'top_directories': top_directories,
+        'vocab_size': vocab_size,
+        'rm_count': rm_count,
+        'editor_counts': editor_counts,
+        'favorite_editor': favorite_editor
     }
 
     # Additional stats if timestamps are available
