@@ -1,131 +1,331 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Bash History Wrapped</title>
+    <title>Terminal Wrapped</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; }
-        h1, h2 { color: #2c3e50; }
-        .chart-container { position: relative; width: 600px; margin: auto; }
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --spotify-green: #1DB954;
+            --gradient-1: linear-gradient(45deg, #ff0099, #493240);
+            --gradient-2: linear-gradient(45deg, #00f260, #0575e6);
+            --gradient-3: linear-gradient(45deg, #8e2de2, #4a00e0);
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow: hidden;
+            height: 100vh;
+        }
+        .cmd-text {
+            font-family: var(--font-mono);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
+        }
+        .slide.prev {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        h1 { font-size: 3rem; margin-bottom: 0.5rem; font-weight: 900; }
+        h2 { font-size: 2rem; margin-bottom: 1rem; color: var(--spotify-green); }
+        p { font-size: 1.2rem; line-height: 1.6; opacity: 0.9; }
+        ul { list-style: none; padding: 0; }
+        li { font-size: 1.5rem; margin: 10px 0; font-weight: bold; }
+        
+        .stat-big { font-size: 5rem; font-weight: 900; color: var(--spotify-green); }
+        .highlight { color: #f1c40f; }
+
+        /* Summary View Styles */
+        #summary-view {
+            display: none;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .btn {
+            background: var(--spotify-green);
+            color: black;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+        
+        /* Chart sizing */
+        canvas { max-width: 100%; max-height: 400px; }
     </style>
 </head>
 <body>
-    <h1>🎉 Your Bash History Wrapped 🎉</h1>
+    <!-- Slides -->
+    <div id="slides-container">
+        
+        <!-- Slide 1: Intro -->
+        <div class="slide active" style="background: var(--gradient-1);">
+            <h1 id="greeting-text">Hello!</h1>
+            <p>Ready to see your terminal journey?</p>
+            <p style="font-size: 0.9rem; margin-top: 20px;">(Tap or Press Space to continue)</p>
+        </div>
 
-    <div class="section">
-        <h2>Most Used Commands</h2>
-        <ul>
-            {% for cmd, count in stats['most_common_cmds'] %}
-                <li>{{ cmd }}: {{ count }} times</li>
-            {% endfor %}
-        </ul>
+        <!-- Slide 2: Total Commands -->
+        <div class="slide" style="background: var(--bg-color);">
+            <h2>Total Commands Run</h2>
+            <div class="stat-big">{{ stats['total_commands'] }}</div>
+            <p>That's a lot of typing!</p>
+        </div>
+
+        <!-- Slide 3: Most Used -->
+        <div class="slide" style="background: var(--gradient-2);">
+            <h2>Your Top Hits</h2>
+            <ul>
+                {% for cmd, count in stats['most_common_cmds'][:5] %}
+                    <li><span class="highlight cmd-text">{{ cmd }}</span> - {{ count }} times</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Slide 4: Longest Command -->
+        <div class="slide" style="background: #2c3e50;">
+            <h2>Longest Command</h2>
+            <p class="cmd-text" style="word-break: break-all; max-width: 800px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px;">
+                {{ stats['longest_cmd'] }}
+            </p>
+            <p>Phew! Did you type that by hand?</p>
+        </div>
+
+        <!-- Slide 5: Weirdest -->
+        <div class="slide" style="background: var(--gradient-3);">
+            <h2>The "What was I thinking?" Moments</h2>
+            <ul>
+                {% for cmd in stats['weirdest_cmds'][:3] %}
+                    <li class="cmd-text">{{ cmd }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Slide 6: Activity -->
+        <div class="slide" style="background: #000;">
+            <h2>Your Rhythm</h2>
+            <p>Most Active Day: <span class="highlight">{{ stats['most_active_day'] }}</span></p>
+            <p>Weekend Commands: <span class="highlight">{{ stats['weekend_commands'] }}</span></p>
+            {% if stats.get('first_cmd_time') %}
+            <p style="font-size: 1rem; margin-top: 20px; color: #888;">From {{ stats['first_cmd_time'] }} to {{ stats['last_cmd_time'] }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Slide 7: Charts -->
+        <div class="slide" style="background: #111;">
+            <h2>Peak Productivity</h2>
+            <div style="width: 80%; height: 60%;">
+                <canvas id="productivity-chart-slide"></canvas>
+            </div>
+        </div>
+
+        <!-- Slide 8: Outro -->
+        <div class="slide" style="background: var(--spotify-green); color: black;">
+            <h1 style="color: black;">That's a Wrap!</h1>
+            <button class="btn" style="background: black; color: white;" onclick="showSummary()">View Dashboard</button>
+        </div>
     </div>
 
-    <div class="section">
-        <h2>Longest Command Typed</h2>
-        <p>{{ stats['longest_cmd'] }}</p>
-    </div>
-
-    <div class="section">
-        <h2>Weirdest Commands</h2>
-        <ul>
-            {% for cmd in stats['weirdest_cmds'] %}
-                <li>{{ cmd }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>Total Commands Run</h2>
-        <p>{{ stats['total_commands'] }}</p>
-    </div>
-
-    {% if stats.get('first_cmd_time') and stats.get('last_cmd_time') %}
-    <div class="section">
-        <h2>Command Journey</h2>
-        <p>Your bash adventure started on {{ stats['first_cmd_time'] }} and ended on {{ stats['last_cmd_time'] }}.</p>
-    </div>
-    {% endif %}
-
-    <div class="section">
-        <h2>Most Active Day</h2>
-        <p>{{ stats['most_active_day'] }}</p>
-    </div>
-
-    <div class="section">
-        <h2>Weekend Warrior</h2>
-        <p>{{ stats['weekend_commands'] }} commands run on weekends</p>
-    </div>
-
-    <div class="section">
-        <h2>Peak Productivity Hours</h2>
-        <canvas id="productivity-chart" width="600" height="400"></canvas>
-    </div>
-
-    <div class="section">
-        <h2>Commands Per Month</h2>
-        <canvas id="monthly-chart" width="600" height="600"></canvas>
+    <!-- Summary View -->
+    <div id="summary-view">
+        <h1 style="text-align: center; margin-bottom: 40px;">Your Terminal Wrapped Summary</h1>
+        <div class="summary-grid">
+            <div class="card">
+                <h3>Total Commands</h3>
+                <div class="stat-big" style="font-size: 3rem;">{{ stats['total_commands'] }}</div>
+            </div>
+            <div class="card">
+                <h3>Top Commands</h3>
+                <ul>
+                    {% for cmd, count in stats['most_common_cmds'] %}
+                        <li><span class="cmd-text">{{ cmd }}</span>: {{ count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Activity</h3>
+                <p>Busiest Day: {{ stats['most_active_day'] }}</p>
+                <p>Weekend: {{ stats['weekend_commands'] }}</p>
+            </div>
+            <div class="card">
+                <h3>Productivity</h3>
+                <canvas id="productivity-chart-summary"></canvas>
+            </div>
+            <div class="card">
+                <h3>Monthly Breakdown</h3>
+                <canvas id="monthly-chart-summary"></canvas>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Greeting Logic
+        const date = new Date();
+        const month = date.getMonth(); // 0-11
+        const day = date.getDate();
+        const greetingEl = document.getElementById('greeting-text');
+        
+        if (month === 11 && day >= 15) {
+            greetingEl.innerText = "Your Year in Terminal 🎁";
+        } else {
+            greetingEl.innerText = "Your Terminal Wrapped 🚀";
+        }
+
+        // Slides Logic
+        let currentSlideIdx = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let isSummaryView = false;
+
+        function nextSlide() {
+            if (isSummaryView) return;
+            
+            if (currentSlideIdx < totalSlides - 1) {
+                slides[currentSlideIdx].classList.remove('active');
+                slides[currentSlideIdx].classList.add('prev');
+                currentSlideIdx++;
+                slides[currentSlideIdx].classList.add('active');
+            }
+        }
+
+        document.body.addEventListener('click', (e) => {
+            if(e.target.tagName !== 'BUTTON') nextSlide();
+        });
+        
+        document.body.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowRight') nextSlide();
+        });
+
+        function showSummary() {
+            isSummaryView = true;
+            document.getElementById('slides-container').style.display = 'none';
+            document.getElementById('summary-view').style.display = 'block';
+            document.body.style.overflow = 'auto';
+            document.body.style.height = 'auto';
+        }
+
+        // Charts
         fetch('bash_wrapped_data.json')
             .then(response => response.json())
             .then(data => {
-                // Productivity Chart (Circle Bar Chart)
-                const ctx = document.getElementById('productivity-chart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'polarArea',
-                    data: {
-                        labels: [...Array(24).keys()],
-                        datasets: [{
-                            label: 'Commands per Hour',
-                            data: data.hours,
-                            backgroundColor: 'rgba(46, 204, 113, 0.5)',
-                            borderColor: 'rgba(46, 204, 113, 1)',
-                            borderWidth: 1,
-                        }],
-                    },
-                    options: {
-                        scale: {
-                            ticks: { beginAtZero: true },
+                const chartConfig = (ctx, type, labels, datasetData, label) => {
+                    return new Chart(ctx, {
+                        type: type,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: label,
+                                data: datasetData,
+                                backgroundColor: [
+                                    'rgba(29, 185, 84, 0.6)',
+                                    'rgba(155, 89, 182, 0.6)',
+                                    'rgba(52, 152, 219, 0.6)',
+                                    'rgba(241, 196, 15, 0.6)',
+                                    'rgba(231, 76, 60, 0.6)'
+                                ],
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1
+                            }]
                         },
-                    },
-                });
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                title: { display: true, text: label, color: 'white' }
+                            },
+                            scales: {
+                                r: {
+                                    grid: { color: 'rgba(255,255,255,0.1)' },
+                                    ticks: { display: false }
+                                },
+                                y: {
+                                    display: type === 'bar',
+                                    grid: { color: 'rgba(255,255,255,0.1)' },
+                                    ticks: { color: 'white' }
+                                },
+                                x: {
+                                    display: type === 'bar',
+                                    grid: { display: false },
+                                    ticks: { color: 'white' }
+                                }
+                            }
+                        }
+                    });
+                };
 
-                // Monthly Chart (Circle Bar Chart)
-                const monthlyCtx = document.getElementById('monthly-chart').getContext('2d');
+                // Slide Chart
+                chartConfig(
+                    document.getElementById('productivity-chart-slide').getContext('2d'),
+                    'bar',
+                    [...Array(24).keys()],
+                    data.hours,
+                    'Commands per Hour'
+                );
+
+                // Summary Charts
+                chartConfig(
+                    document.getElementById('productivity-chart-summary').getContext('2d'),
+                    'polarArea',
+                    [...Array(24).keys()],
+                    data.hours,
+                    'Hourly Activity'
+                );
+                
                 const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                new Chart(monthlyCtx, {
-                    type: 'polarArea',
-                    data: {
-                        labels: monthLabels,
-                        datasets: [{
-                            label: 'Commands per Month',
-                            data: data.months,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.5)',
-                                'rgba(54, 162, 235, 0.5)',
-                                'rgba(255, 206, 86, 0.5)',
-                                'rgba(75, 192, 192, 0.5)',
-                                'rgba(153, 102, 255, 0.5)',
-                                'rgba(255, 159, 64, 0.5)',
-                                'rgba(199, 199, 199, 0.5)',
-                                'rgba(83, 102, 255, 0.5)',
-                                'rgba(255, 99, 255, 0.5)',
-                                'rgba(54, 162, 135, 0.5)',
-                                'rgba(201, 203, 207, 0.5)',
-                                'rgba(255, 205, 86, 0.5)',
-                            ],
-                            borderColor: 'rgba(200, 200, 200, 1)',
-                            borderWidth: 1,
-                        }],
-                    },
-                    options: {
-                        scale: {
-                            ticks: { beginAtZero: true },
-                        },
-                    },
-                });
+                chartConfig(
+                    document.getElementById('monthly-chart-summary').getContext('2d'),
+                    'bar',
+                    monthLabels,
+                    data.months,
+                    'Monthly Activity'
+                );
             });
     </script>
 </body>
