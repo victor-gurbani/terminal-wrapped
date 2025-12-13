@@ -243,6 +243,7 @@
         <div class="slide" style="background: #000;">
             <h2>Your Rhythm</h2>
             <p>Most Active Day: <span class="highlight">{{ stats['most_active_day'] }}</span></p>
+            <p>Longest Streak: <span class="stat-big" style="font-size: 3rem;">{{ stats['daily_streak'] }}</span> days 🔥</p>
             <p>Weekend Commands: <span class="highlight">{{ stats['weekend_commands'] }}</span></p>
             {% if stats.get('first_cmd_time') %}
             <p style="font-size: 1rem; margin-top: 20px; color: #888;">From {{ stats['first_cmd_time'] }} to {{ stats['last_cmd_time'] }}</p>
@@ -333,6 +334,7 @@
             <div class="card">
                 <h3>Activity</h3>
                 <p>Busiest Day: {{ stats['most_active_day'] }}</p>
+                <p>Longest Streak: {{ stats['daily_streak'] }} days 🔥</p>
                 <p>Weekend: {{ stats['weekend_commands'] }}</p>
             </div>
             <div class="card">

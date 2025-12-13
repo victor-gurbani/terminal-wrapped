@@ -230,6 +230,21 @@ def generate_stats(commands):
     sys_tools = ['top', 'htop', 'btop', 'ps', 'free', 'df', 'du', 'kill', 'killall']
     sys_watch_count = sum(1 for cmd in cmd_only if cmd.split()[0] in sys_tools if cmd.split())
 
+    # 17. Daily Streak
+    daily_streak = 0
+    if timestamps:
+        sorted_dates = sorted(list(set(datetime.fromtimestamp(ts).date() for ts in timestamps)))
+        current_streak = 1
+        max_streak = 1
+        for i in range(1, len(sorted_dates)):
+            delta = sorted_dates[i] - sorted_dates[i-1]
+            if delta.days == 1:
+                current_streak += 1
+            else:
+                max_streak = max(max_streak, current_streak)
+                current_streak = 1
+        daily_streak = max(max_streak, current_streak)
+
     stats = {
         'total_commands': total_commands,
         'most_common_cmds': most_common_cmds,
@@ -259,7 +274,8 @@ def generate_stats(commands):
         'friday_deploy_count': friday_deploy_count,
         'complexity_score': complexity_score,
         'top_commit_vibe': top_commit_vibe,
-        'sys_watch_count': sys_watch_count
+        'sys_watch_count': sys_watch_count,
+        'daily_streak': daily_streak
     }
 
     # Additional stats if timestamps are available
@@ -281,6 +297,7 @@ def print_stats(stats):
     if 'first_cmd_time' in stats and 'last_cmd_time' in stats:
         print(f"\n📅 **Your bash adventure started on** {stats['first_cmd_time'].strftime('%Y-%m-%d')} **to** {stats['last_cmd_time'].strftime('%Y-%m-%d')}")
     print(f"\n📈 **Most Active Day:** {stats['most_active_day']}")
+    print(f"\n🔥 **Longest Daily Streak:** {stats['daily_streak']} days")
     print(f"\n🗓️ **Weekend Commands:** {stats['weekend_commands']} commands run on weekends")
 
 def create_app(stats):

@@ -36,7 +36,9 @@ if [ -z "$PYTHON_CMD" ]; then
 fi
 
 # Clone or update the repository
-if [ -d "terminal-wrapped" ]; then
+if [ -d ".git" ] && [ -f "main.py" ]; then
+    echo "Already inside the repository. Skipping clone."
+elif [ -d "terminal-wrapped" ]; then
     echo "Directory terminal-wrapped already exists. Updating..."
     cd terminal-wrapped || exit
     git pull --ff-only
