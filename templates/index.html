@@ -27,6 +27,8 @@
             background: rgba(255, 255, 255, 0.1);
             padding: 2px 6px;
             border-radius: 4px;
+            word-break: break-all;
+            white-space: pre-wrap;
         }
         .slide {
             position: absolute;
@@ -146,7 +148,31 @@
             </ul>
         </div>
 
-        <!-- Slide 6: Activity -->
+        <!-- Slide 6: Power User Stats -->
+        <div class="slide" style="background: #8e44ad;">
+            <h2>Power User Stats</h2>
+            <p>Sudo Usage: <span class="stat-big">{{ stats['sudo_percentage'] }}%</span></p>
+            <p>Git Addict Score: <span class="stat-big">{{ stats['git_percentage'] }}%</span></p>
+            <p>Vocabulary Size: <span class="highlight">{{ stats['vocab_size'] }}</span> unique commands</p>
+        </div>
+
+        <!-- Slide 7: The Plumber -->
+        <div class="slide" style="background: #2980b9;">
+            <h2>The Plumber 🔧</h2>
+            <p>Most Pipes in One Command:</p>
+            <div class="stat-big">{{ stats['pipe_count'] }}</div>
+            <p class="cmd-text" style="font-size: 0.8rem; max-width: 800px; margin-top: 20px;">{{ stats['pipe_master_cmd'] }}</p>
+        </div>
+
+        <!-- Slide 8: Habits -->
+        <div class="slide" style="background: #d35400;">
+            <h2>Your Habits</h2>
+            <p>Chronotype: <span class="stat-big">{{ stats['chronotype'] }}</span></p>
+            <p>Favorite Editor: <span class="stat-big">{{ stats['favorite_editor'] }}</span></p>
+            <p>Oops Moments (rm): <span class="highlight">{{ stats['rm_count'] }}</span> times</p>
+        </div>
+
+        <!-- Slide 9: Activity -->
         <div class="slide" style="background: #000;">
             <h2>Your Rhythm</h2>
             <p>Most Active Day: <span class="highlight">{{ stats['most_active_day'] }}</span></p>
@@ -156,7 +182,7 @@
             {% endif %}
         </div>
 
-        <!-- Slide 7: Charts -->
+        <!-- Slide 10: Charts -->
         <div class="slide" style="background: #111;">
             <h2>Peak Productivity</h2>
             <div style="width: 80%; height: 60%;">
@@ -164,7 +190,7 @@
             </div>
         </div>
 
-        <!-- Slide 8: Outro -->
+        <!-- Slide 11: Outro -->
         <div class="slide" style="background: var(--spotify-green); color: black;">
             <h1 style="color: black;">That's a Wrap!</h1>
             <button class="btn" style="background: black; color: white;" onclick="showSummary()">View Dashboard</button>
@@ -178,6 +204,7 @@
             <div class="card">
                 <h3>Total Commands</h3>
                 <div class="stat-big" style="font-size: 3rem;">{{ stats['total_commands'] }}</div>
+                <p>Unique Commands: {{ stats['vocab_size'] }}</p>
             </div>
             <div class="card">
                 <h3>Top Commands</h3>
@@ -186,6 +213,30 @@
                         <li><span class="cmd-text">{{ cmd }}</span>: {{ count }}</li>
                     {% endfor %}
                 </ul>
+            </div>
+            <div class="card">
+                <h3>Power Stats</h3>
+                <p>Sudo Usage: {{ stats['sudo_percentage'] }}%</p>
+                <p>Git Usage: {{ stats['git_percentage'] }}%</p>
+                <p>Rm Count: {{ stats['rm_count'] }}</p>
+                <p>Chronotype: {{ stats['chronotype'] }}</p>
+            </div>
+            <div class="card">
+                <h3>The Plumber</h3>
+                <p>Max Pipes: {{ stats['pipe_count'] }}</p>
+                <p class="cmd-text" style="font-size: 0.8rem;">{{ stats['pipe_master_cmd'] }}</p>
+            </div>
+            <div class="card">
+                <h3>Top Directories</h3>
+                <ul>
+                    {% for dir, count in stats['top_directories'] %}
+                        <li><span class="cmd-text">{{ dir }}</span>: {{ count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Editor Wars</h3>
+                <canvas id="editor-chart-summary"></canvas>
             </div>
             <div class="card">
                 <h3>Activity</h3>
@@ -325,6 +376,16 @@
                     monthLabels,
                     data.months,
                     'Monthly Activity'
+                );
+
+                // Editor Chart
+                const editorData = data.editor_counts;
+                chartConfig(
+                    document.getElementById('editor-chart-summary').getContext('2d'),
+                    'doughnut',
+                    Object.keys(editorData),
+                    Object.values(editorData),
+                    'Editor Wars'
                 );
             });
     </script>
