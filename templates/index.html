@@ -139,7 +139,7 @@
         <div class="slide active" style="background: var(--gradient-1);">
             <h1 id="greeting-text">Hello!</h1>
             <p>Ready to see your terminal journey?</p>
-            <p style="font-size: 0.9rem; margin-top: 20px;">(Tap or Press Space to continue)</p>
+            <p style="font-size: 0.9rem; margin-top: 20px;">(Tap, Space, or Arrow Keys to navigate)</p>
             <button class="btn" style="background: rgba(255,255,255,0.2); font-size: 0.8rem; padding: 10px 20px; margin-top: 30px;" onclick="showSummary()">Skip to Dashboard</button>
         </div>
 
@@ -369,12 +369,31 @@
             }
         }
 
+        function prevSlide() {
+            if (isSummaryView) return;
+            
+            if (currentSlideIdx > 0) {
+                slides[currentSlideIdx].classList.remove('active');
+                currentSlideIdx--;
+                slides[currentSlideIdx].classList.remove('prev');
+                slides[currentSlideIdx].classList.add('active');
+            }
+        }
+
         document.body.addEventListener('click', (e) => {
-            if(e.target.tagName !== 'BUTTON') nextSlide();
+            if(e.target.tagName !== 'BUTTON') {
+                // Simple tap navigation: Left side goes back, right side goes forward
+                if (e.clientX < window.innerWidth / 3) {
+                    prevSlide();
+                } else {
+                    nextSlide();
+                }
+            }
         });
         
         document.body.addEventListener('keydown', (e) => {
             if (e.code === 'Space' || e.code === 'ArrowRight') nextSlide();
+            if (e.code === 'ArrowLeft') prevSlide();
         });
 
         function showSummary() {

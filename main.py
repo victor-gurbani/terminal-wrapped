@@ -5,6 +5,7 @@ import threading
 import argparse
 import webbrowser
 import time
+import socket
 from datetime import datetime
 from collections import Counter, defaultdict
 from flask import Flask, render_template
@@ -132,7 +133,7 @@ def generate_stats(commands):
         if dt.weekday() >= 5:
             weekend_commands += 1
 
-    most_active_day = max(days, key=days.get) if days else ""
+    most_active_day = max(days, key=lambda k: days[k]) if days else ""
 
     # New Statistics
     
@@ -170,7 +171,7 @@ def generate_stats(commands):
         first_word = cmd.split()[0] if cmd.split() else ""
         if first_word in editors:
             editor_counts[first_word] += 1
-    favorite_editor = max(editor_counts, key=editor_counts.get) if any(editor_counts.values()) else "None"
+    favorite_editor = max(editor_counts, key=lambda k: editor_counts[k]) if any(editor_counts.values()) else "None"
 
     # 9. Package Manager Wars
     pkg_managers = ['npm', 'yarn', 'pnpm', 'pip', 'pip3', 'brew', 'apt', 'apt-get', 'gem', 'cargo', 'go', 'docker', 'kubectl']
@@ -298,7 +299,16 @@ def create_app(stats):
     return app
 
 def start_server(app):
+    # Find a free port starting from 8081
     port = 8081
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('127.0.0.1', port))
+                break
+        except OSError:
+            port += 1
+
     url = f"http://127.0.0.1:{port}"
     
     def open_browser():
