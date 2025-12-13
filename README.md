@@ -8,16 +8,14 @@
 
 - **Multi-Shell Support**: Automatically detects and parses history files from Bash, Zsh, and Fish shells.
 - **Usage Statistics**:
-    - Most used commands.
-    - Longest command typed.
-    - Weirdest commands (commands used only once).
-    - Total commands run.
-    - Command journey (start and end dates).
-    - Most active day.
-    - Number of commands run on weekends.
+    - **General**: Total commands, Vocabulary size, Longest command, Weirdest commands.
+    - **Activity**: Most active day, Weekend activity, Longest Daily Streak, Night Owl vs Early Bird.
+    - **Power User**: Sudo usage, Git usage, Pipe mastery, Complexity score.
+    - **Habits**: Editor preference (Editor Wars), Package manager usage, Directory hopping.
+    - **Personality**: Clean Freak, Help Seeker, The Connector, Friday Deployer, Commit Vibes.
 - **Visualizations**:
-    - Circle bar chart showing commands per month.
-    - Circle bar chart showing peak productivity hours.
+    - **Spotify-Wrapped Style Slides**: Navigate through your terminal journey with interactive slides.
+    - **Dashboard**: Comprehensive summary view with charts for Hourly/Monthly activity, Editor usage, and Package ecosystems.
 - **Local Web Interface**: Starts a Flask web server to display statistics and charts in a user-friendly interface.
 
 ## 🏃 Quickstart
