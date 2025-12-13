@@ -227,7 +227,7 @@ def generate_stats(commands):
     top_commit_vibe = max(commit_vibes.items(), key=lambda x: x[1])[0] if commit_vibes else "No Commits"
 
     # 16. System Watcher
-    sys_tools = ['top', 'htop', 'btop', 'ps', 'free', 'df', 'du', 'kill', 'killall']
+    sys_tools = ['top', 'htop', 'btop', 'ps', 'free', 'df', 'du', 'kill', 'killall', 'ncdu']
     sys_watch_count = sum(1 for cmd in cmd_only if cmd.split()[0] in sys_tools if cmd.split())
 
     # 17. Daily Streak
