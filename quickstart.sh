@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Terminal-Wrapped Quickstart Script
-set -e  # Exit immediately if a command exits with a non-zero status
+set -euo pipefail
 
 echo "🚀 Starting Terminal-Wrapped Setup..."
 
@@ -10,10 +10,14 @@ command_exists () {
     command -v "$1" >/dev/null 2>&1 ;
 }
 
+fail() {
+    echo "Error: $1" >&2
+    exit 1
+}
+
 # Check for git
 if ! command_exists git ; then
-    echo "Error: git is not installed."
-    exit 1
+    fail "git is not installed."
 fi
 
 # Check for Python 3
@@ -28,8 +32,7 @@ elif command_exists python; then
 fi
 
 if [ -z "$PYTHON_CMD" ]; then
-    echo "Error: Python 3 is not installed."
-    exit 1
+    fail "Python 3 is not installed."
 fi
 
 # Clone or update the repository
@@ -43,18 +46,22 @@ else
     cd terminal-wrapped || exit
 fi
 
-# Create virtual environment
-$PYTHON_CMD -m venv venv
+# Create or reuse virtual environment
+if [ ! -d "venv" ]; then
+    $PYTHON_CMD -m venv venv
+fi
 
 # Activate virtual environment
 source venv/bin/activate
 
+python -m pip install --upgrade pip setuptools wheel >/dev/null
+
 # Install dependencies
 if [ -f requirements.txt ]; then
-    pip install -r requirements.txt
+    python -m pip install -r requirements.txt
 else
     # If requirements.txt doesn't exist, install Flask manually
-    pip install flask
+    python -m pip install flask
 fi
 
 # Run the main script

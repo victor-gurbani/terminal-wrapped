@@ -4,6 +4,8 @@
     <title>Terminal Wrapped</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A Spotify-Wrapped style summary of your terminal history.">
+    <meta name="color-scheme" content="dark">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -129,6 +131,12 @@
         
         /* Chart sizing */
         canvas { max-width: 100%; max-height: 400px; }
+
+        .chart-status {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
     </style>
 </head>
 <body>
@@ -262,7 +270,7 @@
         <div class="summary-grid">
             <div class="card">
                 <h3>Total Commands</h3>
-                <div class="stat-big" style="font-size: 3rem;" class="tooltip" data-tip="Total number of commands found in your history file.">{{ stats['total_commands'] }}</div>
+                <div class="stat-big tooltip" style="font-size: 3rem;" data-tip="Total number of commands found in your history file.">{{ stats['total_commands'] }}</div>
                 <p><span class="tooltip" data-tip="Number of distinct commands used.">Unique Commands</span>: {{ stats['vocab_size'] }}</p>
             </div>
             <div class="card">
@@ -405,8 +413,20 @@
         }
 
         // Charts
-        fetch('bash_wrapped_data.json')
-            .then(response => response.json())
+        const showChartError = (message) => {
+            const summary = document.getElementById('summary-view');
+            if (!summary) return;
+            const p = document.createElement('p');
+            p.className = 'chart-status';
+            p.textContent = message;
+            summary.insertBefore(p, summary.firstChild.nextSibling);
+        };
+
+        fetch('/bash_wrapped_data.json', { cache: 'no-store' })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
             .then(data => {
                 const createChart = (ctx, type, labels, datasetData, label, showScales = true) => {
                     const options = {
@@ -532,6 +552,10 @@
                     'Package Ecosystem',
                     false
                 );
+            })
+            .catch(err => {
+                console.error('Failed to load chart data:', err);
+                showChartError('Charts failed to load (data fetch error). Try refreshing.');
             });
     </script>
 </body>
