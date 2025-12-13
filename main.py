@@ -195,6 +195,38 @@ def generate_stats(commands):
         if dt.weekday() == 4 and dt.hour >= 16:
             friday_deploy_count += 1
 
+    # 14. Scripting Savvy (Complexity)
+    chain_operators = ['&&', ';', '|', '>', '>>']
+    complex_cmds = sum(1 for cmd in cmd_only if any(op in cmd for op in chain_operators))
+    complexity_score = round((complex_cmds / total_commands * 100), 1) if total_commands > 0 else 0
+
+    # 15. Git Commit Vibes
+    commit_regex = re.compile(r'git commit.*-m\s+["\'](.*?)["\']')
+    commit_messages = []
+    for cmd in cmd_only:
+        match = commit_regex.search(cmd)
+        if match:
+            commit_messages.append(match.group(1).lower())
+    
+    commit_vibes = defaultdict(int)
+    for msg in commit_messages:
+        if any(w in msg for w in ['fix', 'bug', 'issue', 'resolve', 'patch']):
+            commit_vibes['🐛 Fixes'] += 1
+        elif any(w in msg for w in ['feat', 'add', 'new', 'create', 'implement']):
+            commit_vibes['✨ Features'] += 1
+        elif any(w in msg for w in ['wip', 'temp', 'todo', 'test']):
+            commit_vibes['🚧 WIP'] += 1
+        elif any(w in msg for w in ['refactor', 'clean', 'style', 'format']):
+            commit_vibes['🧹 Cleanup'] += 1
+        else:
+            commit_vibes['📝 Other'] += 1
+    
+    top_commit_vibe = max(commit_vibes.items(), key=lambda x: x[1])[0] if commit_vibes else "No Commits"
+
+    # 16. System Watcher
+    sys_tools = ['top', 'htop', 'btop', 'ps', 'free', 'df', 'du', 'kill', 'killall']
+    sys_watch_count = sum(1 for cmd in cmd_only if cmd.split()[0] in sys_tools if cmd.split())
+
     stats = {
         'total_commands': total_commands,
         'most_common_cmds': most_common_cmds,
@@ -221,7 +253,10 @@ def generate_stats(commands):
         'clean_count': clean_count,
         'help_count': help_count,
         'connector_count': connector_count,
-        'friday_deploy_count': friday_deploy_count
+        'friday_deploy_count': friday_deploy_count,
+        'complexity_score': complexity_score,
+        'top_commit_vibe': top_commit_vibe,
+        'sys_watch_count': sys_watch_count
     }
 
     # Additional stats if timestamps are available

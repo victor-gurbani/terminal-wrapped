@@ -96,6 +96,35 @@
             font-size: 1.2rem;
             margin-top: 20px;
         }
+
+        /* Tooltip Styles */
+        .tooltip {
+            position: relative;
+            cursor: help;
+            border-bottom: 1px dotted #888;
+            display: inline-block;
+        }
+        .tooltip:hover::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            width: max-content;
+            max-width: 250px;
+            white-space: normal;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            pointer-events: none;
+            margin-bottom: 5px;
+            line-height: 1.4;
+            text-align: center;
+        }
         
         /* Chart sizing */
         canvas { max-width: 100%; max-height: 400px; }
@@ -192,7 +221,15 @@
             </div>
         </div>
 
-        <!-- Slide 11: Activity -->
+        <!-- Slide 11: Developer DNA -->
+        <div class="slide" style="background: #8e44ad;">
+            <h2>Developer DNA 🧬</h2>
+            <p>Scripting Savvy: <span class="stat-big">{{ stats['complexity_score'] }}%</span> complex commands</p>
+            <p>Commit Vibe: <span class="highlight">{{ stats['top_commit_vibe'] }}</span></p>
+            <p>System Watcher: Checked stats <span class="highlight">{{ stats['sys_watch_count'] }}</span> times</p>
+        </div>
+
+        <!-- Slide 12: Activity -->
         <div class="slide" style="background: #000;">
             <h2>Your Rhythm</h2>
             <p>Most Active Day: <span class="highlight">{{ stats['most_active_day'] }}</span></p>
@@ -202,7 +239,7 @@
             {% endif %}
         </div>
 
-        <!-- Slide 12: Charts -->
+        <!-- Slide 13: Charts -->
         <div class="slide" style="background: #111;">
             <h2>Peak Productivity</h2>
             <div style="width: 80%; height: 60%;">
@@ -210,7 +247,7 @@
             </div>
         </div>
 
-        <!-- Slide 13: Outro -->
+        <!-- Slide 14: Outro -->
         <div class="slide" style="background: var(--spotify-green); color: black;">
             <h1 style="color: black;">That's a Wrap!</h1>
             <button class="btn" style="background: black; color: white;" onclick="showSummary()">View Dashboard</button>
@@ -223,8 +260,8 @@
         <div class="summary-grid">
             <div class="card">
                 <h3>Total Commands</h3>
-                <div class="stat-big" style="font-size: 3rem;">{{ stats['total_commands'] }}</div>
-                <p>Unique Commands: {{ stats['vocab_size'] }}</p>
+                <div class="stat-big" style="font-size: 3rem;" class="tooltip" data-tip="Total number of commands found in your history file.">{{ stats['total_commands'] }}</div>
+                <p><span class="tooltip" data-tip="Number of distinct commands used.">Unique Commands</span>: {{ stats['vocab_size'] }}</p>
             </div>
             <div class="card">
                 <h3>Top Commands</h3>
@@ -236,21 +273,27 @@
             </div>
             <div class="card">
                 <h3>Power Stats</h3>
-                <p>Sudo Usage: {{ stats['sudo_percentage'] }}%</p>
-                <p>Git Usage: {{ stats['git_percentage'] }}%</p>
-                <p>Rm Count: {{ stats['rm_count'] }}</p>
-                <p>Chronotype: {{ stats['chronotype'] }}</p>
+                <p><span class="tooltip" data-tip="Percentage of commands starting with 'sudo'.">Sudo Usage</span>: {{ stats['sudo_percentage'] }}%</p>
+                <p><span class="tooltip" data-tip="Percentage of commands starting with 'git'.">Git Usage</span>: {{ stats['git_percentage'] }}%</p>
+                <p><span class="tooltip" data-tip="Number of times 'rm' was used.">Rm Count</span>: {{ stats['rm_count'] }}</p>
+                <p><span class="tooltip" data-tip="Based on whether you type more commands 12AM-6AM (Night Owl) or 6AM-12PM (Early Bird).">Chronotype</span>: {{ stats['chronotype'] }}</p>
             </div>
             <div class="card">
                 <h3>Personality Traits</h3>
-                <p>Clean Freak: {{ stats['clean_count'] }}</p>
-                <p>Help Seeker: {{ stats['help_count'] }}</p>
-                <p>Connector: {{ stats['connector_count'] }}</p>
-                <p>Friday Deployer: {{ stats['friday_deploy_count'] }}</p>
+                <p><span class="tooltip" data-tip="Number of times 'clear' was used.">Clean Freak</span>: {{ stats['clean_count'] }}</p>
+                <p><span class="tooltip" data-tip="Usage of 'man' or '--help' flags.">Help Seeker</span>: {{ stats['help_count'] }}</p>
+                <p><span class="tooltip" data-tip="Usage of network tools like ssh, curl, ping.">Connector</span>: {{ stats['connector_count'] }}</p>
+                <p><span class="tooltip" data-tip="Commands run on Fridays after 4 PM.">Friday Deployer</span>: {{ stats['friday_deploy_count'] }}</p>
+                <p><span class="tooltip" data-tip="Usage of monitoring tools like top, htop, df.">System Watcher</span>: {{ stats['sys_watch_count'] }}</p>
+            </div>
+            <div class="card">
+                <h3>Developer DNA</h3>
+                <p><span class="tooltip" data-tip="Percentage of commands using chaining operators (&&, |, etc).">Complexity Score</span>: {{ stats['complexity_score'] }}%</p>
+                <p><span class="tooltip" data-tip="Most common keywords found in your git commit messages.">Commit Vibe</span>: {{ stats['top_commit_vibe'] }}</p>
             </div>
             <div class="card">
                 <h3>The Plumber</h3>
-                <p>Max Pipes: {{ stats['pipe_count'] }}</p>
+                <p><span class="tooltip" data-tip="Highest number of pipes (|) used in a single command.">Max Pipes</span>: {{ stats['pipe_count'] }}</p>
                 <p class="cmd-text" style="font-size: 0.8rem;">{{ stats['pipe_master_cmd'] }}</p>
             </div>
             <div class="card">
