@@ -170,6 +170,31 @@ def generate_stats(commands):
             editor_counts[first_word] += 1
     favorite_editor = max(editor_counts, key=editor_counts.get) if any(editor_counts.values()) else "None"
 
+    # 9. Package Manager Wars
+    pkg_managers = ['npm', 'yarn', 'pnpm', 'pip', 'pip3', 'brew', 'apt', 'apt-get', 'gem', 'cargo', 'go', 'docker', 'kubectl']
+    pkg_counts = {pkg: 0 for pkg in pkg_managers}
+    for cmd in cmd_only:
+        first_word = cmd.split()[0] if cmd.split() else ""
+        if first_word in pkg_managers:
+            pkg_counts[first_word] += 1
+
+    # 10. Clean Freak
+    clean_count = sum(1 for cmd in cmd_only if cmd.strip() == 'clear')
+
+    # 11. Help Seeker
+    help_count = sum(1 for cmd in cmd_only if cmd.strip().startswith('man ') or ' --help' in cmd or ' -h' in cmd)
+
+    # 12. The Connector
+    network_tools = ['ssh', 'curl', 'wget', 'ping', 'nc', 'telnet', 'ftp', 'scp', 'nmap']
+    connector_count = sum(1 for cmd in cmd_only if cmd.split()[0] in network_tools if cmd.split())
+
+    # 13. Friday Deployer
+    friday_deploy_count = 0
+    for ts in timestamps:
+        dt = datetime.fromtimestamp(ts)
+        if dt.weekday() == 4 and dt.hour >= 16:
+            friday_deploy_count += 1
+
     stats = {
         'total_commands': total_commands,
         'most_common_cmds': most_common_cmds,
@@ -191,7 +216,12 @@ def generate_stats(commands):
         'vocab_size': vocab_size,
         'rm_count': rm_count,
         'editor_counts': editor_counts,
-        'favorite_editor': favorite_editor
+        'favorite_editor': favorite_editor,
+        'pkg_counts': pkg_counts,
+        'clean_count': clean_count,
+        'help_count': help_count,
+        'connector_count': connector_count,
+        'friday_deploy_count': friday_deploy_count
     }
 
     # Additional stats if timestamps are available

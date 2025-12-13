@@ -166,8 +166,12 @@
 
         <!-- Slide 8: Habits -->
         <div class="slide" style="background: #d35400;">
-            <h2>Your Habits</h2>
+            <h2>Terminal Personality</h2>
             <p>Chronotype: <span class="stat-big">{{ stats['chronotype'] }}</span></p>
+            <p>Clean Freak (clear): <span class="highlight">{{ stats['clean_count'] }}</span> times</p>
+            <p>Help Seeker (man/--help): <span class="highlight">{{ stats['help_count'] }}</span> times</p>
+            <p>The Connector (ssh/curl): <span class="highlight">{{ stats['connector_count'] }}</span> times</p>
+            <p>Friday Deployer (Fri > 4pm): <span class="highlight">{{ stats['friday_deploy_count'] }}</span> commands</p>
             <p>Oops Moments (rm): <span class="highlight">{{ stats['rm_count'] }}</span> times</p>
         </div>
 
@@ -180,7 +184,15 @@
             <p style="margin-top: 20px;">Your weapon of choice: <span class="highlight">{{ stats['favorite_editor'] }}</span></p>
         </div>
 
-        <!-- Slide 10: Activity -->
+        <!-- Slide 10: Package Ecosystem -->
+        <div class="slide" style="background: #27ae60;">
+            <h2>Package Ecosystem 📦</h2>
+            <div style="width: 80%; height: 60%;">
+                <canvas id="pkg-chart-slide"></canvas>
+            </div>
+        </div>
+
+        <!-- Slide 11: Activity -->
         <div class="slide" style="background: #000;">
             <h2>Your Rhythm</h2>
             <p>Most Active Day: <span class="highlight">{{ stats['most_active_day'] }}</span></p>
@@ -190,7 +202,7 @@
             {% endif %}
         </div>
 
-        <!-- Slide 10: Charts -->
+        <!-- Slide 12: Charts -->
         <div class="slide" style="background: #111;">
             <h2>Peak Productivity</h2>
             <div style="width: 80%; height: 60%;">
@@ -198,7 +210,7 @@
             </div>
         </div>
 
-        <!-- Slide 11: Outro -->
+        <!-- Slide 13: Outro -->
         <div class="slide" style="background: var(--spotify-green); color: black;">
             <h1 style="color: black;">That's a Wrap!</h1>
             <button class="btn" style="background: black; color: white;" onclick="showSummary()">View Dashboard</button>
@@ -230,6 +242,13 @@
                 <p>Chronotype: {{ stats['chronotype'] }}</p>
             </div>
             <div class="card">
+                <h3>Personality Traits</h3>
+                <p>Clean Freak: {{ stats['clean_count'] }}</p>
+                <p>Help Seeker: {{ stats['help_count'] }}</p>
+                <p>Connector: {{ stats['connector_count'] }}</p>
+                <p>Friday Deployer: {{ stats['friday_deploy_count'] }}</p>
+            </div>
+            <div class="card">
                 <h3>The Plumber</h3>
                 <p>Max Pipes: {{ stats['pipe_count'] }}</p>
                 <p class="cmd-text" style="font-size: 0.8rem;">{{ stats['pipe_master_cmd'] }}</p>
@@ -253,6 +272,10 @@
             <div class="card">
                 <h3>Editor Wars</h3>
                 <canvas id="editor-chart-summary"></canvas>
+            </div>
+            <div class="card">
+                <h3>Package Ecosystem</h3>
+                <canvas id="pkg-chart-summary"></canvas>
             </div>
             <div class="card">
                 <h3>Activity</h3>
@@ -397,6 +420,17 @@
                     false
                 );
 
+                // Package Manager Slide Chart
+                const pkgData = data.pkg_counts;
+                createChart(
+                    document.getElementById('pkg-chart-slide').getContext('2d'),
+                    'doughnut',
+                    Object.keys(pkgData),
+                    Object.values(pkgData),
+                    'Package Managers',
+                    false
+                );
+
                 // Summary Charts
                 createChart(
                     document.getElementById('productivity-chart-summary').getContext('2d'),
@@ -422,6 +456,16 @@
                     Object.keys(editorData),
                     Object.values(editorData),
                     'Editor Wars',
+                    false
+                );
+
+                // Package Manager Summary Chart
+                createChart(
+                    document.getElementById('pkg-chart-summary').getContext('2d'),
+                    'doughnut',
+                    Object.keys(pkgData),
+                    Object.values(pkgData),
+                    'Package Ecosystem',
                     false
                 );
             });
