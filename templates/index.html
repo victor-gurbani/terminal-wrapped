@@ -168,11 +168,19 @@
         <div class="slide" style="background: #d35400;">
             <h2>Your Habits</h2>
             <p>Chronotype: <span class="stat-big">{{ stats['chronotype'] }}</span></p>
-            <p>Favorite Editor: <span class="stat-big">{{ stats['favorite_editor'] }}</span></p>
             <p>Oops Moments (rm): <span class="highlight">{{ stats['rm_count'] }}</span> times</p>
         </div>
 
-        <!-- Slide 9: Activity -->
+        <!-- Slide 9: Editor Wars -->
+        <div class="slide" style="background: #34495e;">
+            <h2>Editor Wars ⚔️</h2>
+            <div style="width: 80%; height: 50%;">
+                <canvas id="editor-chart-slide"></canvas>
+            </div>
+            <p style="margin-top: 20px;">Your weapon of choice: <span class="highlight">{{ stats['favorite_editor'] }}</span></p>
+        </div>
+
+        <!-- Slide 10: Activity -->
         <div class="slide" style="background: #000;">
             <h2>Your Rhythm</h2>
             <p>Most Active Day: <span class="highlight">{{ stats['most_active_day'] }}</span></p>
@@ -225,6 +233,14 @@
                 <h3>The Plumber</h3>
                 <p>Max Pipes: {{ stats['pipe_count'] }}</p>
                 <p class="cmd-text" style="font-size: 0.8rem;">{{ stats['pipe_master_cmd'] }}</p>
+            </div>
+            <div class="card">
+                <h3>Weirdest Commands</h3>
+                <ul>
+                    {% for cmd in stats['weirdest_cmds'][:5] %}
+                        <li><span class="cmd-text">{{ cmd }}</span></li>
+                    {% endfor %}
+                </ul>
             </div>
             <div class="card">
                 <h3>Top Directories</h3>
@@ -305,7 +321,39 @@
         fetch('bash_wrapped_data.json')
             .then(response => response.json())
             .then(data => {
-                const chartConfig = (ctx, type, labels, datasetData, label) => {
+                const createChart = (ctx, type, labels, datasetData, label, showScales = true) => {
+                    const options = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { 
+                                display: type === 'doughnut', 
+                                position: 'bottom', 
+                                labels: { color: 'white' } 
+                            },
+                            title: { display: true, text: label, color: 'white' }
+                        }
+                    };
+
+                    if (showScales) {
+                        options.scales = {
+                            r: {
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { display: false, backdropColor: 'transparent' }
+                            },
+                            y: {
+                                display: type === 'bar',
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                ticks: { color: 'white' }
+                            },
+                            x: {
+                                display: type === 'bar',
+                                grid: { display: false },
+                                ticks: { color: 'white' }
+                            }
+                        };
+                    }
+
                     return new Chart(ctx, {
                         type: type,
                         data: {
@@ -314,45 +362,23 @@
                                 label: label,
                                 data: datasetData,
                                 backgroundColor: [
-                                    'rgba(29, 185, 84, 0.6)',
-                                    'rgba(155, 89, 182, 0.6)',
-                                    'rgba(52, 152, 219, 0.6)',
-                                    'rgba(241, 196, 15, 0.6)',
-                                    'rgba(231, 76, 60, 0.6)'
+                                    'rgba(29, 185, 84, 0.8)',
+                                    'rgba(155, 89, 182, 0.8)',
+                                    'rgba(52, 152, 219, 0.8)',
+                                    'rgba(241, 196, 15, 0.8)',
+                                    'rgba(231, 76, 60, 0.8)',
+                                    'rgba(149, 165, 166, 0.8)'
                                 ],
-                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderColor: 'rgba(0,0,0,0.5)',
                                 borderWidth: 1
                             }]
                         },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                title: { display: true, text: label, color: 'white' }
-                            },
-                            scales: {
-                                r: {
-                                    grid: { color: 'rgba(255,255,255,0.1)' },
-                                    ticks: { display: false }
-                                },
-                                y: {
-                                    display: type === 'bar',
-                                    grid: { color: 'rgba(255,255,255,0.1)' },
-                                    ticks: { color: 'white' }
-                                },
-                                x: {
-                                    display: type === 'bar',
-                                    grid: { display: false },
-                                    ticks: { color: 'white' }
-                                }
-                            }
-                        }
+                        options: options
                     });
                 };
 
                 // Slide Chart
-                chartConfig(
+                createChart(
                     document.getElementById('productivity-chart-slide').getContext('2d'),
                     'bar',
                     [...Array(24).keys()],
@@ -360,8 +386,19 @@
                     'Commands per Hour'
                 );
 
+                // Editor Slide Chart
+                const editorData = data.editor_counts;
+                createChart(
+                    document.getElementById('editor-chart-slide').getContext('2d'),
+                    'doughnut',
+                    Object.keys(editorData),
+                    Object.values(editorData),
+                    'Editor Usage',
+                    false
+                );
+
                 // Summary Charts
-                chartConfig(
+                createChart(
                     document.getElementById('productivity-chart-summary').getContext('2d'),
                     'polarArea',
                     [...Array(24).keys()],
@@ -370,7 +407,7 @@
                 );
                 
                 const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                chartConfig(
+                createChart(
                     document.getElementById('monthly-chart-summary').getContext('2d'),
                     'bar',
                     monthLabels,
@@ -378,14 +415,14 @@
                     'Monthly Activity'
                 );
 
-                // Editor Chart
-                const editorData = data.editor_counts;
-                chartConfig(
+                // Editor Summary Chart
+                createChart(
                     document.getElementById('editor-chart-summary').getContext('2d'),
                     'doughnut',
                     Object.keys(editorData),
                     Object.values(editorData),
-                    'Editor Wars'
+                    'Editor Wars',
+                    false
                 );
             });
     </script>
