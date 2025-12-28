@@ -205,6 +205,22 @@
         .card::-webkit-scrollbar-thumb:hover {
             background-color: rgba(255, 255, 255, 0.4);
         }
+
+        /* Global Scrollbar (Main Page) */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #333;
+            border-radius: 6px;
+            border: 3px solid var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #555;
+        }
         
         /* Chart sizing */
         canvas { max-width: 100%; max-height: 400px; }
@@ -237,7 +253,7 @@
 
         <!-- Slide 3: Most Used -->
         <div class="slide" style="background: var(--gradient-2);">
-            <h2>Your Top Hits</h2>
+            <h2 style="color: white;">Your Top Hits</h2>
             <ul>
                 {% for cmd, count in stats['most_common_cmds'][:5] %}
                     <li><span class="highlight cmd-text">{{ cmd }}</span> - {{ count }} times</li>
@@ -302,7 +318,7 @@
 
         <!-- Slide 10: Package Ecosystem -->
         <div class="slide" style="background: #27ae60;">
-            <h2>Package Ecosystem 📦</h2>
+            <h2 style="color: white;">Package Ecosystem 📦</h2>
             <div style="width: 80%; height: 60%;">
                 <canvas id="pkg-chart-slide"></canvas>
             </div>
@@ -370,14 +386,6 @@
                 <p><span class="tooltip" data-tip="Based on whether you type more commands 12AM-6AM (Night Owl) or 6AM-12PM (Early Bird).">Chronotype</span>: {{ stats['chronotype'] }}</p>
             </div>
             <div class="card">
-                <h3>Personality Traits</h3>
-                <p><span class="tooltip" data-tip="Number of times 'clear' was used.">Clean Freak</span>: {{ stats['clean_count'] }}</p>
-                <p><span class="tooltip" data-tip="Usage of 'man' or '--help' flags.">Help Seeker</span>: {{ stats['help_count'] }}</p>
-                <p><span class="tooltip" data-tip="Usage of network tools like ssh, curl, ping.">Connector</span>: {{ stats['connector_count'] }}</p>
-                <p><span class="tooltip" data-tip="Commands run on Fridays after 4 PM.">Friday Deployer</span>: {{ stats['friday_deploy_count'] }}</p>
-                <p><span class="tooltip" data-tip="Usage of monitoring tools like top, htop, df.">System Watcher</span>: {{ stats['sys_watch_count'] }}</p>
-            </div>
-            <div class="card">
                 <h3>Developer DNA</h3>
                 <p><span class="tooltip" data-tip="Percentage of commands using chaining operators (&&, |, etc).">Complexity Score</span>: {{ stats['complexity_score'] }}%</p>
                 <p><span class="tooltip" data-tip="Most common keywords found in your git commit messages.">Commit Vibe</span>: {{ stats['top_commit_vibe'] }}</p>
@@ -386,6 +394,20 @@
                 <h3>The Plumber</h3>
                 <p><span class="tooltip" data-tip="Highest number of pipes (|) used in a single command.">Max Pipes</span>: {{ stats['pipe_count'] }}</p>
                 <p class="cmd-text" style="font-size: 0.8rem;">{{ stats['pipe_master_cmd'] }}</p>
+            </div>
+            <div class="card">
+                <h3>Activity</h3>
+                <p>Busiest Day: {{ stats['most_active_day'] }}</p>
+                <p>Longest Streak: {{ stats['daily_streak'] }} days 🔥</p>
+                <p>Weekend: {{ stats['weekend_commands'] }}</p>
+            </div>
+            <div class="card">
+                <h3>Personality Traits</h3>
+                <p><span class="tooltip" data-tip="Number of times 'clear' was used.">Clean Freak</span>: {{ stats['clean_count'] }}</p>
+                <p><span class="tooltip" data-tip="Usage of 'man' or '--help' flags.">Help Seeker</span>: {{ stats['help_count'] }}</p>
+                <p><span class="tooltip" data-tip="Usage of network tools like ssh, curl, ping.">Connector</span>: {{ stats['connector_count'] }}</p>
+                <p><span class="tooltip" data-tip="Commands run on Fridays after 4 PM.">Friday Deployer</span>: {{ stats['friday_deploy_count'] }}</p>
+                <p><span class="tooltip" data-tip="Usage of monitoring tools like top, htop, df.">System Watcher</span>: {{ stats['sys_watch_count'] }}</p>
             </div>
             <div class="card">
                 <h3>Weirdest Commands</h3>
@@ -403,14 +425,6 @@
                     {% endfor %}
                 </ul>
             </div>
-
-            <div class="card">
-                <h3>Activity</h3>
-                <p>Busiest Day: {{ stats['most_active_day'] }}</p>
-                <p>Longest Streak: {{ stats['daily_streak'] }} days 🔥</p>
-                <p>Weekend: {{ stats['weekend_commands'] }}</p>
-            </div>
-
         </div>
         
         <h2 style="text-align: center; margin: 40px 0 20px;">Visual Insights</h2>
@@ -500,6 +514,7 @@
         document.body.addEventListener('keydown', (e) => {
             if (e.code === 'Space' || e.code === 'ArrowRight') nextSlide();
             if (e.code === 'ArrowLeft') prevSlide();
+            if (e.key === 'Escape') closeModal();
         });
 
         function showSummary() {
