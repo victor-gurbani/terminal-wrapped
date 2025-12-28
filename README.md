@@ -124,3 +124,7 @@ Contributions are welcome! Feel free to submit issues or pull requests to improv
 ## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## ToDo:
+- [ ] Aggregate history stats from other available sources such as proot
+- [ ] Fix strange colours (such as green on green)
