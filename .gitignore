@@ -1,2 +1,5 @@
 venv/
 bash_wrapped_data.json
+
+__pycache__/
+*.pyc

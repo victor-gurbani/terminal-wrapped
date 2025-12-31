@@ -264,7 +264,7 @@
         <!-- Slide 4: Longest Command -->
         <div class="slide" style="background: #2c3e50;">
             <h2>Longest Command</h2>
-            <p class="cmd-text" style="word-break: break-all; max-width: 800px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px;">
+            <p class="cmd-text" style="word-break: break-all; max-width: 800px; max-height: 60vh; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px;">
                 {{ stats['longest_cmd'] }}
             </p>
             <p>Phew! Did you type that by hand?</p>
@@ -523,6 +523,53 @@
             document.getElementById('summary-view').style.display = 'block';
         }
 
+        // Color Palette & Logic
+        const colorPalette = [
+            'rgba(29, 185, 84, 0.8)',   // Spotify Green
+            'rgba(155, 89, 182, 0.8)',  // Purple
+            'rgba(52, 152, 219, 0.8)',  // Blue
+            'rgba(241, 196, 15, 0.8)',  // Yellow
+            'rgba(231, 76, 60, 0.8)',   // Red
+            'rgba(230, 126, 34, 0.8)',  // Orange
+            'rgba(26, 188, 156, 0.8)',  // Teal
+            'rgba(255, 99, 132, 0.8)',  // Pink
+            'rgba(54, 162, 235, 0.8)',  // Light Blue
+            'rgba(255, 206, 86, 0.8)',  // Light Yellow
+            'rgba(75, 192, 192, 0.8)',  // Light Teal
+            'rgba(153, 102, 255, 0.8)', // Light Purple
+            'rgba(255, 159, 64, 0.8)',  // Light Orange
+            'rgba(149, 165, 166, 0.8)'  // Grey
+        ];
+
+        const brandColors = {
+            'vim': 'rgba(1, 152, 51, 0.8)',
+            'nvim': 'rgba(63, 167, 95, 0.8)',
+            'nano': 'rgba(52, 152, 219, 0.8)',
+            'code': 'rgba(0, 122, 204, 0.8)',
+            'emacs': 'rgba(127, 90, 182, 0.8)',
+            'subl': 'rgba(255, 152, 0, 0.8)',
+            'npm': 'rgba(203, 56, 55, 0.8)',
+            'yarn': 'rgba(44, 142, 187, 0.8)',
+            'pip': 'rgba(255, 212, 59, 0.8)',
+            'pip3': 'rgba(255, 212, 59, 0.8)',
+            'cargo': 'rgba(222, 165, 132, 0.8)', 
+            'brew': 'rgba(245, 166, 35, 0.8)',
+            'git': 'rgba(240, 80, 50, 0.8)',
+            'docker': 'rgba(13, 183, 237, 0.8)',
+            'kubectl': 'rgba(50, 108, 229, 0.8)',
+            'go': 'rgba(0, 173, 216, 0.8)',
+            'gem': 'rgba(204, 52, 45, 0.8)'
+        };
+
+        const getColor = (label, index) => {
+            if (!label) return colorPalette[index % colorPalette.length];
+            const lowerLabel = label.toString().toLowerCase();
+            if (brandColors[lowerLabel]) {
+                return brandColors[lowerLabel];
+            }
+            return colorPalette[index % colorPalette.length];
+        };
+
         let globalChartData = null;
         let modalChartInstance = null;
 
@@ -591,6 +638,8 @@
                 };
             }
 
+            const backgroundColors = labels.map((l, i) => getColor(l, i));
+
             modalChartInstance = new Chart(ctx, {
                 type: type,
                 data: {
@@ -598,14 +647,7 @@
                     datasets: [{
                         label: label,
                         data: datasetData,
-                        backgroundColor: [
-                            'rgba(29, 185, 84, 0.8)',
-                            'rgba(155, 89, 182, 0.8)',
-                            'rgba(52, 152, 219, 0.8)',
-                            'rgba(241, 196, 15, 0.8)',
-                            'rgba(231, 76, 60, 0.8)',
-                            'rgba(149, 165, 166, 0.8)'
-                        ],
+                        backgroundColor: backgroundColors,
                         borderColor: 'rgba(0,0,0,0.5)',
                         borderWidth: 1
                     }]
@@ -705,6 +747,8 @@
                         };
                     }
 
+                    const backgroundColors = labels.map((l, i) => getColor(l, i));
+
                     return new Chart(ctx, {
                         type: type,
                         data: {
@@ -712,14 +756,7 @@
                             datasets: [{
                                 label: label,
                                 data: datasetData,
-                                backgroundColor: [
-                                    'rgba(29, 185, 84, 0.8)',
-                                    'rgba(155, 89, 182, 0.8)',
-                                    'rgba(52, 152, 219, 0.8)',
-                                    'rgba(241, 196, 15, 0.8)',
-                                    'rgba(231, 76, 60, 0.8)',
-                                    'rgba(149, 165, 166, 0.8)'
-                                ],
+                                backgroundColor: backgroundColors,
                                 borderColor: 'rgba(0,0,0,0.5)',
                                 borderWidth: 1
                             }]

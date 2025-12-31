@@ -142,8 +142,13 @@ def generate_stats(commands):
     sudo_percentage = (sudo_count / total_commands * 100) if total_commands > 0 else 0
 
     # 2. Pipe Master
-    pipe_master_cmd = max(cmd_only, key=lambda x: x.count('|')) if cmd_only else ""
-    pipe_count = pipe_master_cmd.count('|') if pipe_master_cmd else 0
+    def count_pipes(cmd):
+        # Remove escaped pipes and OR operators to avoid false positives
+        clean_cmd = cmd.replace(r'\|', '').replace('||', '')
+        return clean_cmd.count('|')
+
+    pipe_master_cmd = max(cmd_only, key=count_pipes) if cmd_only else ""
+    pipe_count = count_pipes(pipe_master_cmd) if pipe_master_cmd else 0
 
     # 3. Git Addict
     git_count = sum(1 for cmd in cmd_only if cmd.strip().startswith('git'))
