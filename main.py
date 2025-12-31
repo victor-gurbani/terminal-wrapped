@@ -120,12 +120,32 @@ def generate_stats(commands):
 
     # Time-based statistics
     timestamps = [ts for ts, cmd in commands if ts]
+    
+    # Filter out aggregated timestamps (artifacts from bulk history imports)
+    # If more than 15 commands share the exact same second, we consider it an artifact
+    ts_counts = Counter(timestamps)
+    valid_timestamps = []
+    excluded_count = 0
+    TIMESTAMP_THRESHOLD = 15
+    
+    # Track excluded dates to find the bulk import day
+    excluded_dates = defaultdict(int)
+
+    for ts in timestamps:
+        if ts_counts[ts] > TIMESTAMP_THRESHOLD:
+            excluded_count += 1
+            excluded_dates[datetime.fromtimestamp(ts).strftime('%Y-%m-%d')] += 1
+        else:
+            valid_timestamps.append(ts)
+            
+    bulk_import_day = max(excluded_dates, key=lambda k: excluded_dates[k]) if excluded_dates else None
+
     hours = [0] * 24
     days = defaultdict(int)
     months = [0] * 12
     weekend_commands = 0
 
-    for ts in timestamps:
+    for ts in valid_timestamps:
         dt = datetime.fromtimestamp(ts)
         hours[dt.hour] += 1
         days[dt.strftime('%Y-%m-%d')] += 1
@@ -155,6 +175,8 @@ def generate_stats(commands):
     git_percentage = (git_count / total_commands * 100) if total_commands > 0 else 0
 
     # 4. Night Owl vs Early Bird
+    # Use valid_timestamps (filtered) for chronotype to avoid skewing
+    # Re-calculate hours based on valid_timestamps is already done above in 'hours' list
     night_owl_cmds = sum(hours[0:6])
     early_bird_cmds = sum(hours[6:12])
     chronotype = "Night Owl 🦉" if night_owl_cmds > early_bird_cmds else "Early Bird 🌅"
@@ -198,7 +220,7 @@ def generate_stats(commands):
 
     # 13. Friday Deployer
     friday_deploy_count = 0
-    for ts in timestamps:
+    for ts in valid_timestamps:
         dt = datetime.fromtimestamp(ts)
         if dt.weekday() == 4 and dt.hour >= 16:
             friday_deploy_count += 1
@@ -237,18 +259,41 @@ def generate_stats(commands):
 
     # 17. Daily Streak
     daily_streak = 0
-    if timestamps:
-        sorted_dates = sorted(list(set(datetime.fromtimestamp(ts).date() for ts in timestamps)))
+    streak_start = None
+    streak_end = None
+    
+    if valid_timestamps:
+        sorted_dates = sorted(list(set(datetime.fromtimestamp(ts).date() for ts in valid_timestamps)))
         current_streak = 1
         max_streak = 1
+        
+        # Track ranges
+        current_start = sorted_dates[0]
+        max_start = sorted_dates[0]
+        max_end = sorted_dates[0]
+        
         for i in range(1, len(sorted_dates)):
             delta = sorted_dates[i] - sorted_dates[i-1]
             if delta.days == 1:
                 current_streak += 1
             else:
-                max_streak = max(max_streak, current_streak)
+                if current_streak > max_streak:
+                    max_streak = current_streak
+                    max_start = current_start
+                    max_end = sorted_dates[i-1]
+                
                 current_streak = 1
-        daily_streak = max(max_streak, current_streak)
+                current_start = sorted_dates[i]
+        
+        # Check last streak
+        if current_streak > max_streak:
+            max_streak = current_streak
+            max_start = current_start
+            max_end = sorted_dates[-1]
+            
+        daily_streak = max_streak
+        streak_start = max_start.strftime('%Y-%m-%d')
+        streak_end = max_end.strftime('%Y-%m-%d')
 
     stats = {
         'total_commands': total_commands,
@@ -280,11 +325,19 @@ def generate_stats(commands):
         'complexity_score': complexity_score,
         'top_commit_vibe': top_commit_vibe,
         'sys_watch_count': sys_watch_count,
-        'daily_streak': daily_streak
+        'daily_streak': daily_streak,
+        'streak_start': streak_start,
+        'streak_end': streak_end,
+        'excluded_count': excluded_count,
+        'bulk_import_day': bulk_import_day
     }
 
     # Additional stats if timestamps are available
-    if timestamps:
+    if valid_timestamps:
+        stats['first_cmd_time'] = datetime.fromtimestamp(min(valid_timestamps))
+        stats['last_cmd_time'] = datetime.fromtimestamp(max(valid_timestamps))
+    elif timestamps:
+         # Fallback if all were excluded (unlikely)
         stats['first_cmd_time'] = datetime.fromtimestamp(min(timestamps))
         stats['last_cmd_time'] = datetime.fromtimestamp(max(timestamps))
 

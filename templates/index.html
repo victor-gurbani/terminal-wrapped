@@ -337,6 +337,9 @@
             <h2>Your Rhythm</h2>
             <p>Most Active Day: <span class="highlight">{{ stats['most_active_day'] }}</span></p>
             <p>Longest Streak: <span class="stat-big" style="font-size: 3rem;">{{ stats['daily_streak'] }}</span> days 🔥</p>
+            {% if stats.get('streak_start') and stats.get('streak_end') %}
+            <p style="font-size: 0.9rem; opacity: 0.7; margin-top: -10px;">({{ stats['streak_start'] }} to {{ stats['streak_end'] }})</p>
+            {% endif %}
             <p>Weekend Commands: <span class="highlight">{{ stats['weekend_commands'] }}</span></p>
             {% if stats.get('first_cmd_time') %}
             <p style="font-size: 1rem; margin-top: 20px; color: #888;">From {{ stats['first_cmd_time'] }} to {{ stats['last_cmd_time'] }}</p>
@@ -398,7 +401,7 @@
             <div class="card">
                 <h3>Activity</h3>
                 <p>Busiest Day: {{ stats['most_active_day'] }}</p>
-                <p>Longest Streak: {{ stats['daily_streak'] }} days 🔥</p>
+                <p>Longest Streak: <span class="tooltip" data-tip="{% if stats.get('streak_start') %}From {{ stats['streak_start'] }} to {{ stats['streak_end'] }}{% else %}Consecutive days with commands{% endif %}">{{ stats['daily_streak'] }} days 🔥</span></p>
                 <p>Weekend: {{ stats['weekend_commands'] }}</p>
             </div>
             <div class="card">
@@ -446,6 +449,16 @@
                 <canvas id="monthly-chart-summary"></canvas>
             </div>
         </div>
+
+        {% if stats.get('excluded_count', 0) > 0 %}
+        <p style="text-align: center; margin-top: 30px; opacity: 0.6; font-size: 0.9rem; max-width: 800px; margin-left: auto; margin-right: auto;">
+            ⚠️ Note: {{ stats['excluded_count'] }} commands were excluded from time-based charts (Productivity, Monthly, Streak, Chronotype) because they shared identical timestamps{% if stats.get('bulk_import_day') %}, mostly on {{ stats['bulk_import_day'] }}{% endif %}.
+            <br>
+            {% if stats.get('first_cmd_time') %}
+            Metrics are calculated from {{ stats['first_cmd_time'] }} to {{ stats['last_cmd_time'] }}.
+            {% endif %}
+        </p>
+        {% endif %}
     </div>
 
     <!-- Modal -->

@@ -127,5 +127,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## ToDo:
 - [ ] Aggregate history stats from other available sources such as proot
-- [ ] Fix strange colours (such as green on green)
-- [ ] Improve logic to remove the aggregated commands that are saved when you first enable time-specific stats
+- [x] Improve logic to remove the aggregated commands that are saved when you first enable time-specific stats
